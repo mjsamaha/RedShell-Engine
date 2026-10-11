@@ -5,7 +5,7 @@
 **Author:** LobsterChops
 **Base package:** `com.lobsterchops.redshell`
 **Language / build:** Java, Gradle
-**Status:** Design phase
+**Status:** v0.1 (see [CHANGELOG](../CHANGELOG.md))
 
 ---
 

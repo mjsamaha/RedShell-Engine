@@ -9,7 +9,11 @@ This project was generated with a template including simple application launcher
 - `redshell-engine`: The engine library (`com.lobsterchops.redshell`). No game code; must stay GWT-compatible.
 - `redshell-desktop`: Desktop launcher using LWJGL3.
 - `redshell-html`: Web launcher using GWT and WebGL. Supports only Java projects.
-- `games:sandbox`: First proof-of-concept game, built on the public engine API.
+- `games:sandbox`: First proof-of-concept game (menu, tile map, coins, patrolling hazards), built on the public engine API.
+- `games:arena`: Second game (top-down arena shooter), built on the same public API.
+- `examples`: Small focused examples, one per subsystem (desktop).
+
+Run a game: `gradlew :redshell-desktop:run -Pgame=sandbox` or `-Pgame=arena`. In the browser, `index.html` starts the sandbox and `index.html?game=arena` starts the arena. Guides are in `docs/guides/`; the version is in [CHANGELOG.md](CHANGELOG.md).
 
 See `docs/overview.md`, `docs/architecture.md` and `docs/implementation-plan.md`.
 

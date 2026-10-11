@@ -406,7 +406,7 @@ Deviations / open items:
 - UI assumes the FIT viewport policy; gamepad adapter still deferred.
 - No dedicated `CollisionSystem` or timer-under-pause tests yet.
 
-## 7. Phase 4 — Developer Experience
+## 7. Phase 4 — Developer Experience DONE
 
 ### Goal
 
@@ -483,7 +483,10 @@ Deviations and open items:
 - Examples are desktop only (not GWT-compiled). The overlay on web is compiled but not tested in a browser; the file sink is desktop-only by design.
 - Overlay overhead (<0.5 ms) is not measured.
 - Native bundle (Construo) and the ImGui-based tooling are not done.
-## 8. Phase 5 — v0.1 Validation
+
+---
+
+## 8. Phase 5 — v0.1 Validation DONE
 
 ### Goal
 
@@ -529,6 +532,23 @@ Two different games, launched from the same `redshell-desktop` and `redshell-htm
 ### Exit criteria
 
 RedShell v0.1 is released.
+
+### Implementation status (Phase 5)
+
+Acceptance criteria:
+1. Sandbox DoD items 1-6: all present and exercised (menu and gameplay scenes, controllable player with coins and patrolling hazards, animation, camera follow, collision, sound and music, scene transitions, debug overlay). Verified earlier by running it on desktop.
+2. Disposal: `gradlew :redshell-desktop:leakCheck` loads and unloads every asset group 25 times (also overlapping loads) for both games and found no assets or textures left (sandbox peak 6 textures, arena peak 4, zero left). Not part of `check` because it needs a GL context. `GLProfiler` is not used.
+3. Second game: `games/arena`, a top-down twin-stick arena shooter (own scenes, systems, collision layers, assets and sounds). It used only `com.lobsterchops.redshell.*` and needed no engine source changes. One friction point was found and not changed: creating entities from a system must go through `world.commands().spawn(Prefab)`; the engine's error message says so and the guides now state it.
+4. Both games run from the same launchers: `run -Pgame=sandbox|arena` on desktop and `index.html` / `index.html?game=arena` in the browser. Both were loaded in headless Chrome: the menus render and the arena was played past the menu.
+5. Javadoc: every public top-level and nested type in `redshell-engine` has Javadoc, and every package has a `package-info.java` (checked by script, not enforced by the build). Version is `0.1.0` (`gradle.properties`, jar name `RedShell Engine-0.1.0.jar`), with `CHANGELOG.md`.
+6. `build` (tests, ArchUnit, asset validation for both games, GWT compile) passes.
+
+Open items:
+- The `v0.1.0` git tag is not created: this folder is not a git repository. Tag the release commit yourself: `git tag v0.1.0`.
+- Public API narrowing (making internal classes package-private) was not done; only documentation was reviewed.
+- Audio in the browser was not heard (headless run); WAV is still used by both games.
+- No automated tests exist inside the two game modules.
+- Game modules still contain no platform-specific code; only the launchers choose between games.
 
 ---
 

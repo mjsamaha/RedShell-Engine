@@ -64,6 +64,7 @@ public final class LaunchConfig {
         return targetFps;
     }
 
+    /** Fluent builder; every value has a sensible default. */
     public static final class Builder {
         private String title = "RedShell";
         private int windowWidth = 1280;

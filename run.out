@@ -1,7 +1,0 @@
-[INFO] [App] Starting RedShell Sandbox
-[DEBUG] [EngineBuilder] Building engine (fixed timestep: false)
-[DEBUG] [SystemRegistry] Initializing com.lobsterchops.redshell.rendering.Renderer2D
-[DEBUG] [Renderer2D] World size 640.0x360.0, policy FIT
-[DEBUG] [SystemRegistry] Initializing com.lobsterchops.sandbox.SandboxView
-[INFO] [Sandbox] Sandbox ready. Move the camera with the arrow keys or WASD.
-[INFO] [Engine] Started with 2 systems

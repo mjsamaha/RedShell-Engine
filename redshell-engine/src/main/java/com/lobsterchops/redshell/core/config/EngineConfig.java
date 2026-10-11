@@ -54,6 +54,7 @@ public final class EngineConfig {
         return logLevel;
     }
 
+    /** Fluent builder; every value has a sensible default. */
     public static final class Builder {
         private boolean fixedTimestepEnabled = false;
         private float fixedStepSeconds = 1f / 60f;

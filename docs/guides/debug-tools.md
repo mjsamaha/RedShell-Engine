@@ -16,6 +16,8 @@ The profiler is a `Profiler` service, usable from tests. The inspector is read-o
 **Logging:** `context().log()` writes to the console and an in-memory ring buffer (shown in the overlay).
 On desktop, `GameDefinition.logFileName()` also writes to `~/.redshell/<name>`.
 
+**Leak check:** `gradlew :redshell-desktop:leakCheck [-PgameClass=<class>]` loads and unloads every asset group 25 times (also overlapping) and fails if any asset or GL texture is left. It needs a GL context, so it is not part of `check`.
+
 **Asset validation:** runs at startup in debug builds and with `gradlew :redshell-desktop:validateAssets
-[-Pgame=<GameDefinition class>]`, which is part of `check` (and CI). It reports missing files, unsupported
+[-PgameClass=<GameDefinition class>]`, which is part of `check` (and CI). It reports missing files, unsupported
 file types (audio must be ogg/mp3/wav) and one file registered under two IDs.

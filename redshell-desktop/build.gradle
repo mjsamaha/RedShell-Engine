@@ -32,6 +32,7 @@ dependencies {
   implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
   implementation project(':redshell-engine')
   implementation project(':games:sandbox')
+  implementation project(':games:arena')
   implementation project(':examples')
 
   if(enableGraalNative == 'true') {
@@ -54,6 +55,8 @@ def os = System.properties['os.name'].toLowerCase(Locale.ROOT)
 
 run {
   workingDir = rootProject.file('assets').path
+  // gradlew :redshell-desktop:run -Pgame=arena   (sandbox is the default)
+  args(findProperty('game') ?: 'sandbox')
 // You can uncomment the next line if your IDE claims a build failure even when the app closed properly.
   //setIgnoreExitValue(true)
 // The next two jvmArgs additions help LWJGL3 on JDK 24 and higher.
@@ -226,12 +229,27 @@ tasks.register('runExample', JavaExec) {
 }
 
 // Reports missing files, unsupported file types and shared files in a game's asset catalog.
-// gradlew :redshell-desktop:validateAssets [-Pgame=com.lobsterchops.sandbox.SandboxGame]. Part of `check`.
+// gradlew :redshell-desktop:validateAssets [-PgameClass=<GameDefinition class>] (default: every game). Part of `check`.
 tasks.register('validateAssets', JavaExec) {
   group = 'verification'
   description = 'Validates the asset catalog against the assets folder.'
   classpath = sourceSets.main.runtimeClasspath
   mainClass = 'com.lobsterchops.redshell.desktop.ValidateAssets'
-  args(rootProject.file('assets').path, findProperty('game') ?: 'com.lobsterchops.sandbox.SandboxGame')
+  def gameClasses = findProperty('gameClass') ? [findProperty('gameClass')] : ['com.lobsterchops.sandbox.SandboxGame', 'com.lobsterchops.arena.ArenaGame']
+  args([rootProject.file('assets').path] + gameClasses)
 }
 tasks.named('check') { dependsOn 'validateAssets' }
+// Loads and unloads every asset group repeatedly and fails if anything stays alive. Needs a GL context, so it is
+// not part of `check`: gradlew :redshell-desktop:leakCheck [-PgameClass=<GameDefinition class>]
+tasks.register('leakCheck', JavaExec) {
+  group = 'verification'
+  description = 'Checks that asset groups release every asset and texture when unloaded.'
+  classpath = sourceSets.main.runtimeClasspath
+  mainClass = 'com.lobsterchops.redshell.desktop.LeakCheck'
+  workingDir = rootProject.file('assets').path
+  jvmArgs += "--enable-native-access=ALL-UNNAMED"
+  jvmArgs += "--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED"
+  if (os.contains('mac')) jvmArgs += "-XstartOnFirstThread"
+  def target = findProperty('gameClass') ?: 'com.lobsterchops.sandbox.SandboxGame'
+  args(target)
+}

@@ -47,6 +47,7 @@ gwt.extraSourceDirs.from(
   file('src/main/java'),
   files(project(':redshell-engine').sourceSets.main.allJava.srcDirs),
   files(project(':games:sandbox').sourceSets.main.allJava.srcDirs),
+  files(project(':games:arena').sourceSets.main.allJava.srcDirs),
   files(sourceSets.main.output.resourcesDir)
 )
 
@@ -58,6 +59,7 @@ dependencies {
   implementation "com.google.jsinterop:jsinterop-annotations:2.1.0:sources"
   implementation project(':redshell-engine')
   implementation project(':games:sandbox')
+  implementation project(':games:arena')
 
   constraints {
     implementation "jakarta.servlet:jakarta.servlet-api:6.1.0"

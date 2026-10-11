@@ -1,0 +1,5 @@
+eclipse.project.name = appName + '-arena'
+
+dependencies {
+  api project(':redshell-engine')
+}

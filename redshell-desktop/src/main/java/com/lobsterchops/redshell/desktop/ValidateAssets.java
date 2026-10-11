@@ -6,8 +6,8 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Checks a game's asset catalog against the asset folder without starting the game.
- * Arguments: the asset folder, then the {@link GameDefinition} class name. Exits with 1 if anything is wrong.
+ * Checks game asset catalogs against the asset folder without starting a game.
+ * Arguments: the asset folder, then one or more {@link GameDefinition} class names. Exits with 1 if anything is wrong.
  */
 public final class ValidateAssets {
 
@@ -15,16 +15,20 @@ public final class ValidateAssets {
     }
 
     public static void main(String[] args) throws Exception {
-        File root = new File(args.length > 0 ? args[0] : "assets");
-        String gameClass = args.length > 1 ? args[1] : "com.lobsterchops.sandbox.SandboxGame";
-        GameDefinition game = (GameDefinition) Class.forName(gameClass).getDeclaredConstructor().newInstance();
-        List<String> problems = new AssetValidator(path -> new File(root, path).isFile()).validate(game.assetCatalog());
-        for (String problem : problems) {
-            System.err.println("ERROR " + problem);
+        File root = new File(args[0]);
+        int failures = 0;
+        for (int i = 1; i < args.length; i++) {
+            GameDefinition game = (GameDefinition) Class.forName(args[i]).getDeclaredConstructor().newInstance();
+            List<String> problems = new AssetValidator(path -> new File(root, path).isFile())
+                    .validate(game.assetCatalog());
+            for (String problem : problems) {
+                System.err.println("ERROR " + problem);
+            }
+            System.out.println(game.name() + ": " + game.assetCatalog().entries().size() + " assets, "
+                    + problems.size() + " problem(s)");
+            failures += problems.size();
         }
-        System.out.println(game.name() + ": " + game.assetCatalog().entries().size() + " assets, "
-                + problems.size() + " problem(s)");
-        if (!problems.isEmpty()) {
+        if (failures > 0) {
             System.exit(1);
         }
     }
