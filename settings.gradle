@@ -1,0 +1,12 @@
+plugins {
+  // Applies the foojay-resolver plugin to allow automatic download of JDKs.
+  id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
+rootProject.name = 'redshell'
+
+// redshell-engine  : the engine library (no game code, GWT-compatible)
+// redshell-desktop : LWJGL3 launcher
+// redshell-html    : GWT (browser) launcher
+// games:sandbox    : first proof-of-concept game
+include 'redshell-engine', 'redshell-desktop', 'redshell-html', 'games:sandbox'
