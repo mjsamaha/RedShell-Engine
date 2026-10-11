@@ -1,6 +1,8 @@
 package com.lobsterchops.redshell.entity;
 
 import com.lobsterchops.redshell.entity.component.Component;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -68,6 +70,16 @@ public final class Entity {
         if (tags.remove(tag)) {
             changed();
         }
+    }
+
+    /** Read-only view of the components, for tooling such as the debug inspector. */
+    public Collection<Component> components() {
+        return Collections.unmodifiableCollection(components.values());
+    }
+
+    /** Read-only view of the tags. */
+    public Set<EntityTag> tags() {
+        return Collections.unmodifiableSet(tags);
     }
 
     public boolean hasTag(EntityTag tag) {

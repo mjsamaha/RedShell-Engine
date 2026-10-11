@@ -550,3 +550,11 @@ Create the empty packages and their `package-info.java` early so boundaries exis
 - Physics is plain AABB/circle with a uniform-grid broad phase; CollisionSystem (priority 150) rebuilds the world each frame, resolves solids and publishes ContactEvents.
 - Music is owned by GdxAudioService (asset group udio.music.<id>), not scene groups, so it survives loading transitions.
 - Timers use the engine's scaled delta, so they respect time scale and pause.
+
+## Phase 4 notes (as built)
+
+- Profiling uses a `ScopeListener` (core.lifecycle) that SystemRegistry and World call around each system; `debug.profiler.Profiler` implements it. No debug type is referenced by engine code below layer 5.
+- The debug overlay owns its own `InputService`, so its keys work in any input context and do not appear in game bindings.
+- Any code drawing with another batch or ShapeRenderer must call `Renderer2D.flush()` first.
+- `debug.log.*` may depend only on util and the JDK, so the file sink lives in `debug.filelog` (desktop only).
+- Tools that need `java.io` (`ValidateAssets`, `ExampleLauncher`) live in `redshell-desktop`.

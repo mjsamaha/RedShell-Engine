@@ -4,7 +4,9 @@ import com.lobsterchops.redshell.core.context.EngineContext;
 import com.lobsterchops.redshell.debug.log.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Ordered registration of {@link EngineSystem}s. Systems initialize in registration order, receive
@@ -17,10 +19,17 @@ public final class SystemRegistry {
     private final Log log;
     private final List<EngineSystem> registered = new ArrayList<>();
     private final List<EngineSystem> initialized = new ArrayList<>();
+    private final Map<EngineSystem, String[]> scopeNames = new HashMap<>();
+    private ScopeListener scopeListener;
     private boolean initializing;
 
     public SystemRegistry(Log log) {
         this.log = log;
+    }
+
+    /** Reports every system's fixed update, update and render as a scope; null turns reporting off. */
+    public void setScopeListener(ScopeListener scopeListener) {
+        this.scopeListener = scopeListener;
     }
 
     public void register(EngineSystem system) {
@@ -48,19 +57,52 @@ public final class SystemRegistry {
 
     public void fixedUpdateAll(float fixedDeltaTime) {
         for (int i = 0; i < initialized.size(); i++) {
-            initialized.get(i).fixedUpdate(fixedDeltaTime);
+            EngineSystem system = initialized.get(i);
+            String scope = scope(system, 0);
+            if (scopeListener != null) {
+                scopeListener.begin(scope);
+            }
+            try {
+                system.fixedUpdate(fixedDeltaTime);
+            } finally {
+                if (scopeListener != null) {
+                    scopeListener.end(scope);
+                }
+            }
         }
     }
 
     public void updateAll(float deltaTime) {
         for (int i = 0; i < initialized.size(); i++) {
-            initialized.get(i).update(deltaTime);
+            EngineSystem system = initialized.get(i);
+            String scope = scope(system, 1);
+            if (scopeListener != null) {
+                scopeListener.begin(scope);
+            }
+            try {
+                system.update(deltaTime);
+            } finally {
+                if (scopeListener != null) {
+                    scopeListener.end(scope);
+                }
+            }
         }
     }
 
     public void renderAll(float deltaTime) {
         for (int i = 0; i < initialized.size(); i++) {
-            initialized.get(i).render(deltaTime);
+            EngineSystem system = initialized.get(i);
+            String scope = scope(system, 2);
+            if (scopeListener != null) {
+                scopeListener.begin(scope);
+            }
+            try {
+                system.render(deltaTime);
+            } finally {
+                if (scopeListener != null) {
+                    scopeListener.end(scope);
+                }
+            }
         }
     }
 
@@ -98,6 +140,16 @@ public final class SystemRegistry {
 
     public int size() {
         return registered.size();
+    }
+
+    private String scope(EngineSystem system, int phase) {
+        String[] names = scopeNames.get(system);
+        if (names == null) {
+            String simple = system.getClass().getSimpleName();
+            names = new String[] {"fixed:" + simple, "update:" + simple, "render:" + simple};
+            scopeNames.put(system, names);
+        }
+        return names[phase];
     }
 
     private static String nameOf(EngineSystem system) {

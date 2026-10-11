@@ -1,5 +1,6 @@
 package com.lobsterchops.redshell.ecs;
 
+import com.lobsterchops.redshell.core.lifecycle.ScopeListener;
 import com.lobsterchops.redshell.ecs.query.Query;
 import com.lobsterchops.redshell.ecs.query.QueryCache;
 import com.lobsterchops.redshell.ecs.system.EntitySystem;
@@ -37,6 +38,9 @@ public final class World {
     private int structureVersion;
     private boolean iterating;
     private boolean disposed;
+    private ScopeListener scopeListener;
+    private String[] updateScopes = new String[0];
+    private String[] renderScopes = new String[0];
 
     public Entity createEntity() {
         requireNotIterating();
@@ -95,17 +99,35 @@ public final class World {
             index--;
         }
         systems.add(index, system);
+        rebuildScopeNames();
         system.onAdded(this);
     }
 
     public void removeSystem(EntitySystem system) {
         if (systems.remove(system)) {
+            rebuildScopeNames();
             system.onRemoved(this);
         }
     }
 
     public List<EntitySystem> systems() {
         return Collections.unmodifiableList(systems);
+    }
+
+    /** Reports each system's update and render as a scope (named {@code world.update:Name}); null turns it off. */
+    public void setScopeListener(ScopeListener scopeListener) {
+        this.scopeListener = scopeListener;
+        rebuildScopeNames();
+    }
+
+    private void rebuildScopeNames() {
+        updateScopes = new String[systems.size()];
+        renderScopes = new String[systems.size()];
+        for (int i = 0; i < systems.size(); i++) {
+            String simple = systems.get(i).getClass().getSimpleName();
+            updateScopes[i] = "world.update:" + simple;
+            renderScopes[i] = "world.render:" + simple;
+        }
     }
 
     public void fixedUpdate(float fixedDeltaTime) {
@@ -125,10 +147,16 @@ public final class World {
         for (int i = 0; i < systems.size(); i++) {
             EntitySystem system = systems.get(i);
             iterating = true;
+            if (scopeListener != null) {
+                scopeListener.begin(updateScopes[i]);
+            }
             try {
                 system.update(this, deltaTime);
             } finally {
                 iterating = false;
+                if (scopeListener != null) {
+                    scopeListener.end(updateScopes[i]);
+                }
             }
             commands.flush(this);
         }
@@ -137,10 +165,16 @@ public final class World {
     public void render(RenderContext context) {
         for (int i = 0; i < systems.size(); i++) {
             iterating = true;
+            if (scopeListener != null) {
+                scopeListener.begin(renderScopes[i]);
+            }
             try {
                 systems.get(i).render(this, context);
             } finally {
                 iterating = false;
+                if (scopeListener != null) {
+                    scopeListener.end(renderScopes[i]);
+                }
             }
         }
     }

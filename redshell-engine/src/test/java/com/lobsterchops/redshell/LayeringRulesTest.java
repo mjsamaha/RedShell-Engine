@@ -78,6 +78,16 @@ class LayeringRulesTest {
     }
 
     @Test
+    void nothingBelowTheDebugLayerDependsOnOverlayProfilerOrInspector() {
+        noClasses().that().resideOutsideOfPackages(pkg("debug.overlay"), pkg("debug.profiler"),
+                pkg("debug.inspector"), pkg("app"))
+                .should().dependOnClassesThat().resideInAnyPackage(pkg("debug.overlay"), pkg("debug.profiler"),
+                        pkg("debug.inspector"))
+                .allowEmptyShould(true)
+                .check(classes);
+    }
+
+    @Test
     void layersOnlyDependDownward() {
         assertNoUpwardDependencies(LAYER_0, above(LAYER_1, LAYER_2, LAYER_3, LAYER_4, LAYER_5));
         assertNoUpwardDependencies(LAYER_1, above(LAYER_2, LAYER_3, LAYER_4, LAYER_5));

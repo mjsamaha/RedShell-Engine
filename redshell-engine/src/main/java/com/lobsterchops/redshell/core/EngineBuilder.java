@@ -5,6 +5,7 @@ import com.lobsterchops.redshell.core.config.EngineConfig;
 import com.lobsterchops.redshell.core.context.EngineContext;
 import com.lobsterchops.redshell.core.lifecycle.EngineSystem;
 import com.lobsterchops.redshell.core.lifecycle.RenderBracket;
+import com.lobsterchops.redshell.core.lifecycle.ScopeListener;
 import com.lobsterchops.redshell.core.lifecycle.SystemRegistry;
 import com.lobsterchops.redshell.core.time.GameClock;
 import com.lobsterchops.redshell.debug.log.Log;
@@ -43,6 +44,12 @@ public final class EngineBuilder {
 
     public EngineBuilder renderBracket(RenderBracket renderBracket) {
         this.renderBracket = renderBracket;
+        return this;
+    }
+
+    /** Reports each system's update and render time to the listener (used by the debug profiler). */
+    public EngineBuilder scopeListener(ScopeListener listener) {
+        systems.setScopeListener(listener);
         return this;
     }
 

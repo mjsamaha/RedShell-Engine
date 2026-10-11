@@ -14,7 +14,11 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
+      - name: Make the Gradle wrapper executable
+        run: chmod +x gradlew
       - name: Build and test (includes ArchUnit layering and GWT-compatibility rules)
         run: ./gradlew build
       - name: Compile web build with GWT
         run: ./gradlew :redshell-html:dist
+      - name: Build the desktop JAR
+        run: ./gradlew :games:sandbox:dist

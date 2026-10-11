@@ -3,3 +3,9 @@ eclipse.project.name = appName + '-sandbox'
 dependencies {
   api project(':redshell-engine')
 }
+// Builds the runnable desktop JAR (redshell-desktop/build/libs). The browser build is :redshell-html:dist.
+tasks.register('dist') {
+  group = 'distribution'
+  description = 'Builds the runnable desktop JAR for the sandbox.'
+  dependsOn ':redshell-desktop:jar'
+}

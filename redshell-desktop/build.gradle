@@ -32,6 +32,7 @@ dependencies {
   implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
   implementation project(':redshell-engine')
   implementation project(':games:sandbox')
+  implementation project(':examples')
 
   if(enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-backend-lwjgl3:$graalHelperVersion"
@@ -210,3 +211,27 @@ tasks.withType(JavaExec.class).configureEach {
 if(enableGraalNative == 'true') {
   apply from: file("nativeimage.gradle")
 }
+// Runs one example: gradlew :redshell-desktop:runExample -Pexample=ecs
+// Examples: sprite, ecs, scene-stack, input-actions, collision, audio
+tasks.register('runExample', JavaExec) {
+  group = 'application'
+  description = 'Runs one example by name (-Pexample=<name>).'
+  classpath = sourceSets.main.runtimeClasspath
+  mainClass = 'com.lobsterchops.redshell.desktop.ExampleLauncher'
+  workingDir = rootProject.file('assets').path
+  args(findProperty('example') ?: 'sprite')
+  jvmArgs += "--enable-native-access=ALL-UNNAMED"
+  jvmArgs += "--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED"
+  if (os.contains('mac')) jvmArgs += "-XstartOnFirstThread"
+}
+
+// Reports missing files, unsupported file types and shared files in a game's asset catalog.
+// gradlew :redshell-desktop:validateAssets [-Pgame=com.lobsterchops.sandbox.SandboxGame]. Part of `check`.
+tasks.register('validateAssets', JavaExec) {
+  group = 'verification'
+  description = 'Validates the asset catalog against the assets folder.'
+  classpath = sourceSets.main.runtimeClasspath
+  mainClass = 'com.lobsterchops.redshell.desktop.ValidateAssets'
+  args(rootProject.file('assets').path, findProperty('game') ?: 'com.lobsterchops.sandbox.SandboxGame')
+}
+tasks.named('check') { dependsOn 'validateAssets' }

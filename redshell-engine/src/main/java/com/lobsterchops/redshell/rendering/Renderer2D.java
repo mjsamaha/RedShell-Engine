@@ -27,6 +27,7 @@ public final class Renderer2D implements EngineSystem, RenderBracket {
 
     private final RenderConfig config;
     private final SpriteBatch batch;
+    private int lastFrameRenderCalls;
     private final GameCamera camera = new GameCamera();
     private final Viewport viewport;
     private final ResizeHandler resizeHandler;
@@ -74,6 +75,7 @@ public final class Renderer2D implements EngineSystem, RenderBracket {
         viewport.apply();
         camera.update();
         batch.setProjectionMatrix(camera.combined());
+        batch.renderCalls = 0;
         batch.begin();
         drawing = true;
     }
@@ -83,6 +85,7 @@ public final class Renderer2D implements EngineSystem, RenderBracket {
         if (drawing) {
             batch.end();
             drawing = false;
+            lastFrameRenderCalls = batch.renderCalls;
         }
     }
 
@@ -140,6 +143,11 @@ public final class Renderer2D implements EngineSystem, RenderBracket {
         float height = viewport.getWorldHeight() * camera.zoom();
         fillRect(camera.x() - width, camera.y() - height, width * 2f, height * 2f, color);
     }
+    /** Draw calls the world batch issued in the last completed frame. */
+    public int lastFrameRenderCalls() {
+        return lastFrameRenderCalls;
+    }
+
     public GameCamera camera() {
         return camera;
     }

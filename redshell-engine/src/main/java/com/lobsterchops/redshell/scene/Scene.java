@@ -1,5 +1,6 @@
 package com.lobsterchops.redshell.scene;
 
+import com.lobsterchops.redshell.core.lifecycle.ScopeListener;
 import com.lobsterchops.redshell.assets.catalog.AssetGroup;
 import com.lobsterchops.redshell.ecs.World;
 import com.lobsterchops.redshell.events.Event;
@@ -71,7 +72,7 @@ public abstract class Scene {
         return context;
     }
 
-    protected final World world() {
+    public final World world() {
         return world;
     }
 
@@ -101,6 +102,9 @@ public abstract class Scene {
         entered = true;
         this.context = sceneContext;
         this.world = new World();
+        if (sceneContext.engine() != null && sceneContext.engine().hasService(ScopeListener.class)) {
+            world.setScopeListener(sceneContext.engine().service(ScopeListener.class));
+        }
         AssetGroup group = assets();
         if (group != null && !assetsAcquired) {
             sceneContext.log().warn("Scene", name() + " entered without preloaded assets; loading synchronously");

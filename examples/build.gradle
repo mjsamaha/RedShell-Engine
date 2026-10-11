@@ -1,0 +1,5 @@
+eclipse.project.name = appName + '-examples'
+
+dependencies {
+  api project(':redshell-engine')
+}

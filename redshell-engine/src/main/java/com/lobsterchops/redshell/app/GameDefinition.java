@@ -45,6 +45,11 @@ public interface GameDefinition {
         return name().toLowerCase().replace(' ', '-');
     }
 
+    /** Log file name on desktop (written to ~/.redshell/), or null for no log file. Browsers keep logs in memory only. */
+    default String logFileName() {
+        return null;
+    }
+
     /** Current save format version. */
     default int saveVersion() {
         return 1;

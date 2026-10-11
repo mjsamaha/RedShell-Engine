@@ -9,4 +9,5 @@ rootProject.name = 'redshell'
 // redshell-desktop : LWJGL3 launcher
 // redshell-html    : GWT (browser) launcher
 // games:sandbox    : first proof-of-concept game
-include 'redshell-engine', 'redshell-desktop', 'redshell-html', 'games:sandbox'
+// examples         : one small focused example per subsystem (desktop)
+include 'redshell-engine', 'redshell-desktop', 'redshell-html', 'games:sandbox', 'examples'

@@ -405,6 +405,7 @@ Deviations / open items:
 - The web build compiles but has not been run in a browser (audio unlock, storage persistence unverified).
 - UI assumes the FIT viewport policy; gamepad adapter still deferred.
 - No dedicated `CollisionSystem` or timer-under-pause tests yet.
+
 ## 7. Phase 4 — Developer Experience
 
 ### Goal
@@ -466,6 +467,22 @@ All acceptance criteria pass; a new contributor can run examples and read guides
 
 ---
 
+### Implementation status (Phase 4)
+
+Done:
+- Debug overlay (F3 stats, F4 colliders, F5 system timings, F6/F7/F8 entity inspector, recent log lines) in `debug.overlay`, backed by `Profiler`/`FrameStats` and the read-only `EntityInspector`.
+- Profiling through a `ScopeListener` hook in `SystemRegistry` and `World`; the profiler is only wired in when `EngineConfig.debug` is on.
+- Logging: in-memory ring buffer sink (also shown in the overlay) and a desktop-only file sink at `~/.redshell/<logFileName>`.
+- `AssetValidator`: missing files, unsupported extensions per type, one file under two IDs. Runs at startup (debug) and as `gradlew :redshell-desktop:validateAssets`, which is part of `check`/CI. Verified by breaking a catalog entry: the task fails with the file named.
+- `examples` module with six examples (`runExample -Pexample=<name>`), `:games:sandbox:dist` desktop JAR, CI step, and guides in `docs/guides/`.
+- Tests: `DebugToolsTest`, plus an ArchUnit rule keeping the debug tools out of the lower layers.
+
+Deviations and open items:
+- The overlay text needs the UI font in the scene's asset group; otherwise only collider bounds are drawn.
+- Draw calls count the world batch only.
+- Examples are desktop only (not GWT-compiled). The overlay on web is compiled but not tested in a browser; the file sink is desktop-only by design.
+- Overlay overhead (<0.5 ms) is not measured.
+- Native bundle (Construo) and the ImGui-based tooling are not done.
 ## 8. Phase 5 — v0.1 Validation
 
 ### Goal

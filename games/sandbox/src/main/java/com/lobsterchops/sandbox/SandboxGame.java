@@ -43,7 +43,12 @@ public final class SandboxGame implements GameDefinition {
 
     @Override
     public EngineConfig engineConfig() {
-        return EngineConfig.builder().logLevel(LogLevel.DEBUG).build();
+        return EngineConfig.builder().logLevel(LogLevel.DEBUG).debug(true).build();
+    }
+
+    @Override
+    public String logFileName() {
+        return "redshell-sandbox.log";
     }
 
     @Override

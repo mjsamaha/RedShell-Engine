@@ -1,6 +1,16 @@
 package com.lobsterchops.redshell.app;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
+import com.lobsterchops.redshell.assets.catalog.AssetCatalog;
+import com.lobsterchops.redshell.assets.validation.AssetValidator;
+import com.lobsterchops.redshell.assets.validation.GdxFileChecker;
+import com.lobsterchops.redshell.core.lifecycle.ScopeListener;
+import com.lobsterchops.redshell.debug.log.MemoryLogSink;
+import com.lobsterchops.redshell.debug.filelog.FileLogSink;
+import com.lobsterchops.redshell.debug.overlay.DebugOverlay;
+import com.lobsterchops.redshell.debug.profiler.Profiler;
+import java.util.List;
 import com.badlogic.gdx.Gdx;
 import com.lobsterchops.redshell.core.Engine;
 import com.lobsterchops.redshell.core.EngineBuilder;
@@ -45,6 +55,7 @@ public final class RedShellApplication implements ApplicationListener {
     private final GameDefinition definition;
     private Log log;
     private Engine engine;
+    private MemoryLogSink memoryLogs;
 
     public RedShellApplication(GameDefinition definition) {
         this.definition = definition;
@@ -54,6 +65,14 @@ public final class RedShellApplication implements ApplicationListener {
     public void create() {
         EngineConfig engineConfig = definition.engineConfig();
         log = new Log(engineConfig.logLevel(), new ConsoleLogSink());
+        if (engineConfig.debugEnabled()) {
+            memoryLogs = new MemoryLogSink(200);
+            log.addSink(memoryLogs);
+            if (definition.logFileName() != null && Gdx.app != null
+                    && Gdx.app.getType() == Application.ApplicationType.Desktop) {
+                log.addSink(new FileLogSink(Gdx.files.external(".redshell/" + definition.logFileName())));
+            }
+        }
         log.info(TAG, "Starting " + definition.name());
         try {
             engine = assemble(engineConfig);
@@ -109,12 +128,35 @@ public final class RedShellApplication implements ApplicationListener {
         } else {
             log.warn(TAG, "No audio device available; audio is disabled");
         }
-        builder.system(input).system(router).system(new SceneManager(definition.createInitialScene()));
+        validateAssets(definition.assetCatalog());
+        SceneManager sceneManager = new SceneManager(definition.createInitialScene());
+        builder.service(SceneManager.class, sceneManager);
+        builder.system(input).system(router).system(sceneManager);
         if (Gdx.gl != null && definition.uiFontAssetId() != null) {
             UiService ui = new UiService(definition.uiFontAssetId());
             builder.service(UiService.class, ui).system(ui);
         }
+        if (engineConfig.debugEnabled()) {
+            Profiler profiler = new Profiler(120);
+            builder.service(ScopeListener.class, profiler).service(Profiler.class, profiler).scopeListener(profiler);
+            if (Gdx.gl != null && Gdx.input != null) {
+                builder.system(new DebugOverlay(definition.uiFontAssetId(), profiler, memoryLogs));
+            }
+        }
         return builder.build();
+    }
+
+    private void validateAssets(AssetCatalog catalog) {
+        if (Gdx.files == null) {
+            return;
+        }
+        List<String> problems = new AssetValidator(new GdxFileChecker()).validate(catalog);
+        for (int i = 0; i < problems.size(); i++) {
+            log.error(TAG, "Asset validation: " + problems.get(i));
+        }
+        if (problems.isEmpty()) {
+            log.debug(TAG, "Asset validation passed (" + catalog.entries().size() + " assets)");
+        }
     }
     @Override
     public void render() {
